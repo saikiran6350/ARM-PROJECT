@@ -1,0 +1,76 @@
+#include <LPC21xx.H>
+#include "header.h"
+extern int l_indi,r_indi,h_light;
+extern CAN1 v1;
+void head_light_isr()__irq
+{
+static int i=0;
+i^=1;
+if(i)
+{
+v1.byteA=0x10;
+h_light=1;
+can1_tx(v1);
+}
+else
+{
+v1.byteA=0x11;
+h_light=0;
+can1_tx(v1);
+}
+EXTINT|=1;
+VICVectAddr=0;
+}
+void right_indicator_isr()__irq
+{
+static int j=0;
+j^=1;
+if(j)
+{
+v1.byteA=0x12;
+can1_tx(v1);
+r_indi=1;
+}
+else
+{
+v1.byteA=0x13;
+can1_tx(v1);
+r_indi=0;
+}
+EXTINT|=2;
+VICVectAddr=0;
+}
+void left_indicator_isr()__irq
+{
+static int k=0;
+k^=1;
+if(k)
+{
+v1.byteA=0x14;
+can1_tx(v1);
+l_indi=1;
+}
+else
+{
+v1.byteA=0x15;
+can1_tx(v1);
+l_indi=0;
+}
+EXTINT|=4;
+VICVectAddr=0;
+}
+void eint_init()
+{
+PINSEL1|=0X1;
+PINSEL0|=0XC0C0;
+EXTMODE=7;
+EXTPOLAR=0;
+VICIntSelect=0;
+VICVectCntl0=14|(1<<5);
+VICVectAddr0=(unsigned int)head_light_isr;
+VICVectCntl1=15|(1<<5);
+VICVectAddr1=(unsigned int)right_indicator_isr;
+VICVectCntl2=16|(1<<5);
+VICVectAddr2=(unsigned int)left_indicator_isr;
+VICIntEnable=(7<<14);
+}

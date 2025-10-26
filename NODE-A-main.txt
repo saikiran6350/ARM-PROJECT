@@ -1,0 +1,16 @@
+#include <LPC21xx.H>
+#include "header.h"
+int h_light=0;
+int l_indi=0;
+int r_indi=0;
+CAN1 v1;
+main()
+{ can1_init();
+v1.id=0x501;
+v1.dlc=1;
+v1.rtr=0;
+v1.byteA=0;
+v1.byteB=0;
+eint_init();
+while(1);
+}
